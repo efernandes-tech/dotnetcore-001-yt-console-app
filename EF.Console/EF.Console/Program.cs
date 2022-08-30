@@ -1,31 +1,36 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CommandLine;
+using Microsoft.Extensions.Configuration;
 using Serilog;
-using System;
 using System.IO;
 
 namespace EF.Console
 {
-    internal class Program
+    public class Program
     {
         static void Main(string[] args)
         {
             var build = new ConfigurationBuilder();
 
+            // Config appsettings
             build.SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
+            // Config logger
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(build.Build())
                 .WriteTo.Console()
                 .CreateLogger();
 
-            Log.Logger.Information("Information");
-            Log.Logger.Warning("Warning");
-            Log.Logger.Error("Error");
-            Log.Logger.Fatal("Information");
+            // Config parâmetros
+            Parser.Default.ParseArguments<Options>(args)
+                .WithParsed(opts =>
+                {
+                    Log.Logger.Information($"{opts.requisicoes}");
+                    Log.Logger.Information($"{opts.host}");
+                });
 
-            System.Console.ReadLine();
+            Log.Logger.Information("Fim da aplicação");
         }
     }
 }
