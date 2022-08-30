@@ -1,5 +1,7 @@
 ﻿using CommandLine;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using System.IO;
 
@@ -22,12 +24,24 @@ namespace EF.Console
                 .WriteTo.Console()
                 .CreateLogger();
 
-            // Config parâmetros
+            // Config parâmetros (CommandParseLine)
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(opts =>
                 {
-                    Log.Logger.Information($"{opts.requisicoes}");
-                    Log.Logger.Information($"{opts.host}");
+                    // Funcionamento em backgroud
+                    var app = Host.CreateDefaultBuilder()
+                        .ConfigureServices((context, services) =>
+                        {
+                            services.AddHostedService<Worker>();
+
+                            // Injeção de dependência
+                            services.AddTransient<IProcesso, Processo>();
+
+                        })
+                        .UseSerilog()
+                        .Build();
+
+                    app.Run();
                 });
 
             Log.Logger.Information("Fim da aplicação");
