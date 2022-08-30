@@ -17,3 +17,11 @@
 cd EF.Console\EF.Console\bin\Debug\net5.0\
 EF.Console.exe -r 10 --host teste
 ```
+
+## Docker:
+- Criar imagem e rodar aplicação
+```
+cd EF.Console
+docker build -f EF.Console\Dockerfile -t app-ef-console .
+docker run -d --name AppEfConsole app-ef-console
+```
